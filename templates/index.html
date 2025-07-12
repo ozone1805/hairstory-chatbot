@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hairstory Assistant</title>
+  <script src="/static/main.js" defer></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2em;
+      max-width: 700px;
+      margin: auto;
+      background: #f7f7f7;
+    }
+    #chat-box {
+      background: #fff;
+      padding: 1em;
+      border: 1px solid #ccc;
+      height: 400px;
+      overflow-y: auto;
+      margin-bottom: 1em;
+    }
+    .chat { margin-bottom: 1em; }
+    .user { color: #007acc; }
+    .bot { color: #222; }
+    input[type="text"] {
+      width: 70%;
+      padding: 0.5em;
+    }
+    button {
+      padding: 0.5em 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Hairstory Assistant</h1>
+  <div id="chat-box"></div>
+  <input id="user-input" type="text" placeholder="Ask me something..." />
+  <button onclick="sendMessage()">Send</button>
+</body>
+</html>
