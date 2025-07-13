@@ -29,6 +29,63 @@ async function sendMessage() {
   chatBox.innerHTML += `<div class="chat user"><strong>You:</strong> ${message}</div>`;
   input.value = "";
 
+  // Show rainbow wheel as cursor
+  const wheel = document.getElementById("rainbow-wheel");
+  wheel.style.display = "block";
+  document.body.classList.add("loading");
+
+  // Get current mouse position immediately
+  let currentX = 0, currentY = 0;
+  let targetX = 0, targetY = 0;
+  let rotationAngle = 0;
+
+  // Function to get current mouse position (if available)
+  const getCurrentMousePosition = () => {
+    // Try to get from a global mouse tracker or use a reasonable default
+    if (window.lastMouseX !== undefined && window.lastMouseY !== undefined) {
+      return { x: window.lastMouseX, y: window.lastMouseY };
+    }
+    // Fallback to center of viewport
+    return { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+  };
+
+  // Initialize position at current mouse location
+  const initialPos = getCurrentMousePosition();
+  currentX = targetX = initialPos.x;
+  currentY = targetY = initialPos.y;
+
+  // Function to update wheel position with smooth interpolation
+  const updateWheelPosition = (e) => {
+    targetX = e.clientX;
+    targetY = e.clientY;
+  };
+
+  // Smooth animation loop
+  const animateWheel = () => {
+    // Smooth interpolation for position
+    currentX += (targetX - currentX) * 0.3;
+    currentY += (targetY - currentY) * 0.3;
+    
+    // Smooth rotation
+    rotationAngle += 6; // 6 degrees per frame for smooth rotation
+    
+    // Apply transforms
+    wheel.style.left = currentX + "px";
+    wheel.style.top = currentY + "px";
+    wheel.style.transform = `translate(-50%, -50%) rotate(${rotationAngle}deg)`;
+    
+    // Continue animation if wheel is visible
+    if (wheel.style.display === "block") {
+      requestAnimationFrame(animateWheel);
+    }
+  };
+
+  // Add mouse move listener
+  document.addEventListener("mousemove", updateWheelPosition);
+  
+  // Start smooth animation
+  animateWheel();
+
   try {
     const res = await fetch("/chat", {
       method: "POST",
@@ -47,6 +104,18 @@ async function sendMessage() {
 
   } catch (err) {
     chatBox.innerHTML += `<div class="chat bot"><strong>Error:</strong> ${err.message}</div>`;
+  } finally {
+    // Hide rainbow wheel and remove mouse listener
+    wheel.style.display = "none";
+    document.body.classList.remove("loading");
+    document.removeEventListener("mousemove", updateWheelPosition);
+    
+    // Reset position for next use
+    currentX = 0;
+    currentY = 0;
+    targetX = 0;
+    targetY = 0;
+    rotationAngle = 0;
   }
 
   chatBox.scrollTop = chatBox.scrollHeight;

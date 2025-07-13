@@ -4,6 +4,13 @@
   <meta charset="UTF-8" />
   <title>Hairstory Assistant</title>
   <script src="/static/main.js" defer></script>
+  <script>
+    // Global mouse position tracker
+    document.addEventListener('mousemove', (e) => {
+      window.lastMouseX = e.clientX;
+      window.lastMouseY = e.clientY;
+    });
+  </script>
   <style>
     body {
       font-family: sans-serif;
@@ -43,12 +50,60 @@
     button {
       padding: 0.5em 1em;
     }
+    
+    /* Rainbow Spinning Wheel */
+    .rainbow-wheel {
+      position: fixed;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: conic-gradient(
+        from 0deg,
+        #ff0000 0deg,
+        #ff8000 45deg,
+        #ffff00 90deg,
+        #00ff00 135deg,
+        #0080ff 180deg,
+        #8000ff 225deg,
+        #ff0080 270deg,
+        #ff0000 315deg,
+        #ff0000 360deg
+      );
+      z-index: 9999;
+      display: none;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      pointer-events: none;
+    }
+    
+    .rainbow-wheel::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      background: #f7f7f7;
+      border-radius: 50%;
+    }
+    
+    /* Hide cursor when wheel is active */
+    body.loading {
+      cursor: none !important;
+    }
+    
+    body.loading * {
+      cursor: none !important;
+    }
   </style>
 </head>
 <body>
   <h1>Hairstory Assistant</h1>
-  <div id="chat-box"></div>
+  <div id="chat-box">
+    <div class="chat bot"><strong>Bot:</strong> What's your Hairstory?</div>
+  </div>
   <input id="user-input" type="text" placeholder="Ask me something..." />
   <button onclick="sendMessage()">Send</button>
+  <div id="rainbow-wheel" class="rainbow-wheel"></div>
 </body>
 </html>
