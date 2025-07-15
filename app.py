@@ -10,6 +10,10 @@ load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 assistant_id = os.getenv("ASSISTANT_ID")
 
+# Debug logging to verify assistant ID
+print(f"Using Assistant ID: {assistant_id}")
+print(f"OpenAI API Key configured: {'Yes' if openai.api_key else 'No'}")
+
 app = Flask(__name__)
 CORS(app)  # Enable cross-origin requests for local dev
 
