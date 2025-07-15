@@ -18,45 +18,40 @@ app = Flask(__name__)
 CORS(app)  # Enable cross-origin requests for local dev
 
 # In-memory thread cache for simplicity (restart = new session)
-thread_id = None
+# Remove global thread_id
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
+@app.route("/new_thread", methods=["POST"])
+def new_thread():
+    thread = openai.beta.threads.create()
+    return jsonify({"thread_id": thread.id})
+
 @app.route("/chat", methods=["POST"])
 def chat():
-    global thread_id
-    
     if not request.json:
         return jsonify({"error": "Invalid JSON"}), 400
-        
     user_input = request.json.get("message")
-
+    thread_id = request.json.get("thread_id")
     if not user_input:
         return jsonify({"error": "Missing message"}), 400
-
     if not assistant_id:
         return jsonify({"error": "Assistant ID not configured"}), 500
-
-    # Step 1: Create a thread if none exists
-    if thread_id is None:
-        thread = openai.beta.threads.create()
-        thread_id = thread.id
-
+    if not thread_id:
+        return jsonify({"error": "Missing thread_id"}), 400
     # Step 2: Add user's message to the thread
     openai.beta.threads.messages.create(
         thread_id=thread_id,
         role="user",
         content=user_input
     )
-
     # Step 3: Run the assistant
     run = openai.beta.threads.runs.create(
         thread_id=thread_id,
         assistant_id=assistant_id
     )
-
     # Step 4: Poll until the run completes
     while True:
         run_status = openai.beta.threads.runs.retrieve(
@@ -68,14 +63,12 @@ def chat():
         elif run_status.status in ["failed", "cancelled", "expired"]:
             return jsonify({"error": f"Run failed: {run_status.status}"}), 500
         time.sleep(0.5)
-
     # Step 5: Retrieve the latest message
     messages = openai.beta.threads.messages.list(thread_id=thread_id)
     assistant_reply = next(
         (msg.content[0].text.value for msg in messages.data if msg.role == "assistant" and hasattr(msg.content[0], 'text') and msg.content[0].type == 'text'),
         "No response from assistant."
     )
-
     return jsonify({"response": assistant_reply})
 
 if __name__ == "__main__":

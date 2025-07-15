@@ -18,6 +18,19 @@ function markdownToHtml(text) {
   return html;
 }
 
+let threadId = null;
+
+// On page load, request a new thread ID
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res = await fetch('/new_thread', { method: 'POST' });
+    const data = await res.json();
+    threadId = data.thread_id;
+  } catch (err) {
+    alert('Failed to start a new conversation. Please reload the page.');
+  }
+});
+
 async function sendMessage() {
   const input = document.getElementById("user-input");
   const message = input.value.trim();
@@ -90,7 +103,7 @@ async function sendMessage() {
     const res = await fetch("/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message })
+      body: JSON.stringify({ message, thread_id: threadId })
     });
 
     const data = await res.json();
